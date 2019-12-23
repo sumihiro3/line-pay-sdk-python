@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABCMeta
+from __future__ import unicode_literals
 
+from future.utils import with_metaclass
+
+from abc import ABCMeta
 
 class BaseError(with_metaclass(ABCMeta, Exception)):
     """Base Exception class."""

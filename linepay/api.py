@@ -6,6 +6,7 @@ import hmac
 import json
 import uuid
 
+from .util import validate_function
 from .exceptions import InvalidSignatureError
 
 
@@ -16,6 +17,7 @@ class LinePayApi(object):
     DEFAULT_API_ENDPOINT = "https://api-pay.line.me"
     SANDBOX_API_ENDPOINT = "https://sandbox-api-pay.line.me"
 
+    @validate_function
     def __init__(
         self,
         channel_id: str,
@@ -40,6 +42,7 @@ class LinePayApi(object):
             "Content-Type": "application/json"
         }
 
+    @validate_function
     def sign(
         self,
         headers: dict,
@@ -55,9 +58,10 @@ class LinePayApi(object):
         signed_headers: dict = copy.deepcopy(headers)
         nonce: str = str(uuid.uuid4())
         signed_headers["X-LINE-Authorization-Nonce"] = nonce
-        hmac_key: str = self.channel_secret
-        hmac_text: str = self.channel_secret + path + body + nonce
+        hmac_key: bytes = self.channel_secret.encode("utf-8")
+        hmac_text_str: str = self.channel_secret + path + body + nonce
+        hmac_text_bytes: bytes = hmac_text_str.encode("utf-8")
         signature: str = hmac.new(
-            hmac_key, hmac_text, hashlib.sha256).hexdigest()
+            hmac_key, hmac_text_bytes, hashlib.sha256).hexdigest()
         signed_headers["X-LINE-Authorization"] = signature
         return signed_headers
