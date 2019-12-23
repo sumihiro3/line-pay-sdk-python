@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import inspect
+import logging
+
+LOGGER = logging.getLogger('linepay')
 
 
 def validate_function(func):
