@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
-from future.utils import with_metaclass
-
-from abc import ABCMeta
-
-class BaseError(with_metaclass(ABCMeta, Exception)):
+class BaseError(Exception):
     """Base Exception class."""
 
     def __init__(self, message='-'):
@@ -64,5 +59,5 @@ class LinePayApiError(BaseError):
 
         :rtype: str
         """
-        return '{0}: return_code={1}, status_code={2}, api_response={3}, headers={4}'.format(
+        return '{0}: return_code={1}, http_status_code={2}, api_response={3}, http_headers={4}'.format(
             self.__class__.__name__, self.return_code, self.status_code, self.api_response, self.headers)
