@@ -1,5 +1,9 @@
 from setuptools import setup, find_packages
 
+def _requirements():
+    with open('requirements.txt', 'r') as fd:
+        return [name.strip() for name in fd.readlines()]
+
 with open('README.rst', 'r') as fd:
     long_description = fd.read()
 
@@ -13,5 +17,5 @@ setup(
     url='https://github.com/sumihiro3/line-pay-sdk-python',
     license=license,
     packages=find_packages(exclude=('tests', 'docs', 'requests')),
-	install_requires=['requests'],
+	install_requires=_requirements(),
 )
