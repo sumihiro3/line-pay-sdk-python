@@ -7,7 +7,7 @@ SDK of the LINE Pay API for Python.
 
 Introduction
 ------------
-The LINE Pay API SDK for Python makes it easy to develop bots using LINE Pay API.
+The LINE Pay API SDK for Python makes it easy to develop apps using LINE Pay API.
 
 
 Documentation
