@@ -59,7 +59,7 @@ class LinePayApi(object):
         """
         signed_headers: dict = copy.deepcopy(headers)
         # Create nonce
-        nonce: str = str(uuid.uuid4())
+        nonce: str = self._create_nonce()
         signed_headers["X-LINE-Authorization-Nonce"] = nonce
         # Create HMAC Signature
         hmac_key: bytes = self.channel_secret.encode()
@@ -70,6 +70,13 @@ class LinePayApi(object):
         signed_headers["X-LINE-Authorization"] = base64.b64encode(sign.digest()).decode()
         LOGGER.debug(signed_headers)
         return signed_headers
+    
+    @validate_function
+    def _create_nonce(self) -> str:
+        """generate nonce for HMAC Authorization
+        :rtpye str: generate nonce by uuid4
+        """
+        return str(uuid.uuid4())
 
     @validate_function
     def request(self, options: dict) -> dict:
@@ -103,4 +110,3 @@ class LinePayApi(object):
                 headers=dict(response.headers.items()),
                 api_response=result
             )
-
