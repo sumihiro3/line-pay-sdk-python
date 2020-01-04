@@ -21,7 +21,7 @@ class TestLinePayApi(unittest.TestCase):
         self.assertEqual(result["Content-Type"], "application/json")
         self.assertEqual(result["X-LINE-Authorization-Nonce"], nonce)
         self.assertEqual(result["X-LINE-Authorization"], "Rz5VEwPHChlQgN+dEmYWWbtWKw0XS41MblRB/dRdygE=")
-    
+
     def test_request(self):
         with patch('linepay.api.requests.post') as post:
             mock_api_result = MagicMock(return_value={"returnCode": "0000"})
@@ -41,3 +41,34 @@ class TestLinePayApi(unittest.TestCase):
             request_options = {"hoge": "fuga"}
             with self.assertRaises(LinePayApiError):
                 api.request(request_options)
+
+    def test_confirm(self):
+        with patch('linepay.api.requests.post') as post:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            post.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            transaction_id = "transaction-1234567890"
+            amount = 10.0
+            currency = "JPY"
+            result = api.confirm(transaction_id, amount, currency)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments/{}/confirm".format(
+                transaction_id
+            )
+            request_options = {
+                "amount": amount,
+                "currency": currency
+            }
+            mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
+
+    def test_confirm_raise_api_error(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(LinePayApiError):
+                transaction_id = "transaction-1234567890"
+                amount = 10.0
+                currency = "JPY"
+                result = api.confirm(transaction_id, amount, currency)
