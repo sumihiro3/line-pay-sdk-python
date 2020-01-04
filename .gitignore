@@ -3,4 +3,5 @@
 __pycache__/
 line_pay.egg-info/
 dist/
+requests/
 sample.py
