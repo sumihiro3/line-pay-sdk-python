@@ -1,2 +1,6 @@
 .python-version
+.vscode/
 __pycache__/
+line_pay.egg-info/
+dist/
+sample.py
