@@ -154,6 +154,48 @@ class LinePayApi(object):
                 api_response=result
             )
 
+    @validate_function
+    def capture(self, transaction_id: str, amount: float, currency: str) -> dict:
+        """Method to Capture Payment
+        :param str transaction_id: Transaction id returned from Request API
+        :param float amount: Payment amount
+        :param str currency: Payment currency (ISO 4217) Supported currencies are USD, JPY, TWD and THB
+        :rtpye dict: Capture API response
+        """
+        if (self.__class__.is_supported_currency(currency) is False):
+            raise ValueError("Currency:[{}] is not supported by LINE Pay".format(currency))
+        path = "/{api_version}/payments/authorizations/{transaction_id}/capture".format(
+            api_version=self.LINE_PAY_API_VERSION,
+            transaction_id=transaction_id
+        )
+        url = "{api_endpoint}{path}".format(
+            api_endpoint=self.api_endpoint,
+            path=path
+        )
+        options = {
+            "amount": amount,
+            "currency": currency
+        }
+        body_str = json.dumps(options)
+        headers = self.sign(self.headers, path, body_str)
+
+        LOGGER.debug("Going to execute Capture API")
+        response = requests.post(url, json.dumps(options), headers=headers)
+        result = response.json()
+        LOGGER.debug(result)
+        return_code = result.get("returnCode", None)
+        if return_code == "0000":
+            LOGGER.debug("Capture API Completed!")
+            return result
+        else:
+            LOGGER.debug("Capture API Failed...")
+            raise LinePayApiError(
+                return_code=return_code,
+                status_code=response.status_code,
+                headers=dict(response.headers.items()),
+                api_response=result
+            )
+
     @classmethod
     @validate_function
     def is_supported_currency(cls, currency: str) -> bool:
