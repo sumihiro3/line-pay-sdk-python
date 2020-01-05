@@ -77,7 +77,14 @@ class TestLinePayApi(unittest.TestCase):
             self.assertEqual(result, mock_api_result.return_value)
             mock_sign.assert_called_once_with(api.headers, "/v3/payments/request", json.dumps(request_options))
 
-    def test_request_raise_api_error(self):
+    def test_request_with_invalid_param(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1111"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                api.request(None)
+
+    def test_request_with_failed_return_code(self):
         with patch('linepay.api.requests.post') as post:
             post.return_value.json = MagicMock(return_value={"returnCode": "1111"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
@@ -106,7 +113,7 @@ class TestLinePayApi(unittest.TestCase):
             }
             mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
 
-    def test_confirm_raise_api_error(self):
+    def test_confirm_with_failed_return_code(self):
         with patch('linepay.api.requests.post') as post:
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
@@ -115,3 +122,64 @@ class TestLinePayApi(unittest.TestCase):
                 amount = 10.0
                 currency = "JPY"
                 result = api.confirm(transaction_id, amount, currency)
+
+    def test_confirm_with_none_transaction_id(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                transaction_id = None
+                amount = 10.0
+                currency = "JPY"
+                result = api.confirm(transaction_id, amount, currency)
+
+    def test_confirm_with_invalid_transaction_id(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                transaction_id = 10
+                amount = 10.0
+                currency = "JPY"
+                result = api.confirm(transaction_id, amount, currency)
+
+    def test_confirm_with_invalid_amount(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                transaction_id = "transaction-1234567890"
+                amount = 99
+                currency = "JPY"
+                result = api.confirm(transaction_id, amount, currency)
+
+    def test_confirm_with_none_currency(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                transaction_id = "transaction-1234567890"
+                amount = 1.0
+                currency = None
+                result = api.confirm(transaction_id, amount, currency)
+
+    def test_confirm_with_not_supported_currency(self):
+        with patch('linepay.api.requests.post') as post:
+            # post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                transaction_id = "transaction-1234567890"
+                amount = 1.0
+                currency = "GBP"
+                result = api.confirm(transaction_id, amount, currency)
+
+    def test_is_supported_currency(self):
+        self.assertTrue(linepay.LinePayApi.is_supported_currency("USD"))
+        self.assertTrue(linepay.LinePayApi.is_supported_currency("JPY"))
+        self.assertTrue(linepay.LinePayApi.is_supported_currency("TWD"))
+        self.assertTrue(linepay.LinePayApi.is_supported_currency("THB"))
+        self.assertFalse(linepay.LinePayApi.is_supported_currency("GBP"))
+    
+    def test_is_supported_currency_with_none(self):
+        with self.assertRaises(ValueError):
+            self.assertFalse(linepay.LinePayApi.is_supported_currency(None))

@@ -2,6 +2,7 @@
 
 import base64
 import copy
+from enum import Enum
 import hashlib
 import hmac
 import json
@@ -119,6 +120,8 @@ class LinePayApi(object):
         :param str currency: Payment currency (ISO 4217) Supported currencies are USD, JPY, TWD and THB
         :rtpye dict: Confirm API response
         """
+        if (self.__class__.is_supported_currency(currency) is False):
+            raise ValueError("Currency:[{}] is not supported by LINE Pay".format(currency))
         path = "/{api_version}/payments/{transaction_id}/confirm".format(
             api_version=self.LINE_PAY_API_VERSION,
             transaction_id=transaction_id
@@ -150,3 +153,23 @@ class LinePayApi(object):
                 headers=dict(response.headers.items()),
                 api_response=result
             )
+
+    @classmethod
+    @validate_function
+    def is_supported_currency(cls, currency: str) -> bool:
+        """Check supported currency or not
+        :param str currency: currency type
+        :rtype bool: supported currency or not
+        """
+        result = False
+        obj = CurrencyType.__members__.get(currency, None)
+        if obj is not None:
+            result = True
+        return result
+
+class CurrencyType(Enum):
+    # LINE Pay API supports USD, JPY, TWD, THB
+    USD = "USD"
+    JPY = "JPY"
+    TWD = "TWD"
+    THB = "THB"
