@@ -7,6 +7,49 @@ from linepay.exceptions import LinePayApiError
 
 class TestLinePayApi(unittest.TestCase):
 
+    def test_constructor(self):
+        print("testing constructor.")
+        with self.assertRaises(ValueError):
+            channel_id = "hoge"
+            channel_secret = None
+            api = linepay.LinePayApi(channel_id, channel_secret, is_sandbox=True)
+
+    def test_constructor_with_sandbox(self):
+        print("testing constructor with sandbox.")
+        channel_id = "hoge"
+        channel_secret = "fuga"
+        api = linepay.LinePayApi(channel_id, channel_secret, is_sandbox=True)
+        # assert
+        self.assertEqual(api.headers.get("Content-Type"), "application/json")
+        self.assertEqual(api.headers.get("X-LINE-ChannelId"), channel_id)
+        self.assertEqual(api.channel_id, channel_id)
+        self.assertEqual(api.channel_secret, channel_secret)
+        self.assertEqual(api.api_endpoint, linepay.LinePayApi.SANDBOX_API_ENDPOINT)
+
+    def test_constructor_with_production(self):
+        print("testing constructor with production.")
+        channel_id = "hoge"
+        channel_secret = "fuga"
+        api = linepay.LinePayApi(channel_id, channel_secret, is_sandbox=False)
+        # assert
+        self.assertEqual(api.headers.get("Content-Type"), "application/json")
+        self.assertEqual(api.headers.get("X-LINE-ChannelId"), channel_id)
+        self.assertEqual(api.channel_id, channel_id)
+        self.assertEqual(api.channel_secret, channel_secret)
+        self.assertEqual(api.api_endpoint, linepay.LinePayApi.DEFAULT_API_ENDPOINT)
+    
+    def test_constructor_with_default_endpoint(self):
+        print("testing constructor with production.")
+        channel_id = "hoge"
+        channel_secret = "fuga"
+        api = linepay.LinePayApi(channel_id, channel_secret)
+        # assert
+        self.assertEqual(api.headers.get("Content-Type"), "application/json")
+        self.assertEqual(api.headers.get("X-LINE-ChannelId"), channel_id)
+        self.assertEqual(api.channel_id, channel_id)
+        self.assertEqual(api.channel_secret, channel_secret)
+        self.assertEqual(api.api_endpoint, linepay.LinePayApi.DEFAULT_API_ENDPOINT)
+
     def test_sign(self):
         print("testing sign.")
         channel_id = "hoge"
