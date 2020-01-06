@@ -196,6 +196,80 @@ class LinePayApi(object):
                 api_response=result
             )
 
+    @validate_function
+    def refund(self, transaction_id: str, refund_amount: float = 0.0) -> dict:
+        """Method to Refund Payment
+        :param str transaction_id: Transaction id returned from Request API
+        :param float refund_amount: Refund amount. Full refund if not returned
+        :rtpye dict: Refund API response
+        """
+        path = "/{api_version}/payments/{transaction_id}/refund".format(
+            api_version=self.LINE_PAY_API_VERSION,
+            transaction_id=transaction_id
+        )
+        url = "{api_endpoint}{path}".format(
+            api_endpoint=self.api_endpoint,
+            path=path
+        )
+        if (refund_amount > 0):
+            options = {
+                "refundAmount": refund_amount
+            }
+        else:
+            options = {}
+        body_str = json.dumps(options)
+        headers = self.sign(self.headers, path, body_str)
+
+        LOGGER.debug("Going to execute Refund API")
+        response = requests.post(url, json.dumps(options), headers=headers)
+        result = response.json()
+        LOGGER.debug(result)
+        return_code = result.get("returnCode", None)
+        if return_code == "0000":
+            LOGGER.debug("Refund API Completed!")
+            return result
+        else:
+            LOGGER.debug("Refund API Failed...")
+            raise LinePayApiError(
+                return_code=return_code,
+                status_code=response.status_code,
+                headers=dict(response.headers.items()),
+                api_response=result
+            )
+
+    @validate_function
+    def void(self, transaction_id: str) -> dict:
+        """Method to Void Payment
+        :param str transaction_id: Transaction id returned from Request API
+        :rtpye dict: Void API response
+        """
+        path = "/{api_version}/payments/authorizations/{transaction_id}/void".format(
+            api_version=self.LINE_PAY_API_VERSION,
+            transaction_id=transaction_id
+        )
+        url = "{api_endpoint}{path}".format(
+            api_endpoint=self.api_endpoint,
+            path=path
+        )
+        headers = self.sign(self.headers, path, "")
+
+        LOGGER.debug("Going to execute Void API")
+        response = requests.post(url, "", headers=headers)
+        result = response.json()
+        LOGGER.debug(result)
+        return_code = result.get("returnCode", None)
+        if return_code == "0000":
+            LOGGER.debug("Void API Completed!")
+            return result
+        else:
+            LOGGER.debug("Void API Failed...")
+            raise LinePayApiError(
+                return_code=return_code,
+                status_code=response.status_code,
+                headers=dict(response.headers.items()),
+                api_response=result
+            )
+
     @classmethod
     @validate_function
     def is_supported_currency(cls, currency: str) -> bool:

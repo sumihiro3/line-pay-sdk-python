@@ -291,6 +291,74 @@ class TestLinePayApi(unittest.TestCase):
                 transaction_id = 10
                 result = api.void(transaction_id)
 
+    def test_refund(self):
+        with patch('linepay.api.requests.post') as post:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            post.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            transaction_id = "transaction-1234567890"
+            amount = 10.0
+            result = api.refund(transaction_id, refund_amount=amount)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments/{}/refund".format(
+                transaction_id
+            )
+            request_options = {
+                "refundAmount": amount
+            }
+            mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
+
+    def test_refund_with_no_amount(self):
+        with patch('linepay.api.requests.post') as post:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            post.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            transaction_id = "transaction-1234567890"
+            result = api.refund(transaction_id)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments/{}/refund".format(
+                transaction_id
+            )
+            request_options = {}
+            mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
+
+    def test_refund_with_failed_return_code(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(LinePayApiError):
+                transaction_id = "transaction-1234567890"
+                result = api.refund(transaction_id)
+
+    def test_refund_with_none_transaction_id(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1150"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                transaction_id = None
+                result = api.refund(transaction_id)
+
+    def test_refund_with_invalid_transaction_id(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1150"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                transaction_id = 10
+                result = api.refund(transaction_id)
+
+    def test_refund_with_invalid_amount(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                transaction_id = "transaction-1234567890"
+                amount = "invalid"
+                result = api.refund(transaction_id, refund_amount=amount)
+
     def test_is_supported_currency(self):
         self.assertTrue(linepay.LinePayApi.is_supported_currency("USD"))
         self.assertTrue(linepay.LinePayApi.is_supported_currency("JPY"))
