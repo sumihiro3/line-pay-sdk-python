@@ -5,5 +5,5 @@ line_pay_sdk.egg-info/
 line_pay.egg-info/
 dist/
 requests/
-sample.py
+sample*.py
 .env
