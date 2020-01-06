@@ -108,7 +108,7 @@ class TestLinePayApi(unittest.TestCase):
                 transaction_id
             )
             request_options = {
-                "amount": amount,
+                "amount": int(amount),
                 "currency": currency
             }
             mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
@@ -188,7 +188,7 @@ class TestLinePayApi(unittest.TestCase):
                 transaction_id
             )
             request_options = {
-                "amount": amount,
+                "amount": int(amount),
                 "currency": currency
             }
             mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
@@ -265,7 +265,8 @@ class TestLinePayApi(unittest.TestCase):
             path = "/v3/payments/authorizations/{}/void".format(
                 transaction_id
             )
-            mock_sign.assert_called_once_with(api.headers, path, "")
+            request_options = {}
+            mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
 
     def test_void_with_failed_return_code(self):
         with patch('linepay.api.requests.post') as post:
@@ -368,4 +369,14 @@ class TestLinePayApi(unittest.TestCase):
 
     def test_is_supported_currency_with_none(self):
         with self.assertRaises(ValueError):
-            self.assertFalse(linepay.LinePayApi.is_supported_currency(None))
+            linepay.LinePayApi.is_supported_currency(None)
+
+    def test_round_amount_by_currency(self):
+        self.assertEqual(1, linepay.LinePayApi.round_amount_by_currency("JPY", 1.0))
+        self.assertEqual(9.99, linepay.LinePayApi.round_amount_by_currency("USD", 9.99))
+        self.assertEqual(9.99, linepay.LinePayApi.round_amount_by_currency("THB", 9.99))
+        self.assertEqual(9.99, linepay.LinePayApi.round_amount_by_currency("TWD", 9.99))
+
+    def test_round_amount_by_currency_with_unsupported_currency(self):
+        with self.assertRaises(ValueError):
+            linepay.LinePayApi.round_amount_by_currency("GBP", 9.99)
