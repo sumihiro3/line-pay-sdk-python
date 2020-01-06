@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<title>LINE Pay Confirm API Result</title>
+    </head>
+    <body>
+		<dl>
+			<dt>orderId</dt>
+			<dd>{{ result.info.orderId }}</dd>
+			<dt>transactionId</dt>
+			<dd>{{ result.info.transactionId }}</dd>
+			<dt>product name</dt>
+			<dd>{{ result.info.packages[0].products[0].name }}</dd>
+			<dt>price</dt>
+			<dd>{{ result.info.packages[0].products[0].price }}</dd>
+			<dt>Access to below link to void your payment</dt>
+			<dd>
+				<a href="/void" rel="noopener noreferrer">VOID</a>
+			</dd>
+		</dl>
+    </body>
+</html>

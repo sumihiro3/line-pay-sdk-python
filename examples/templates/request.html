@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<title>LINE Pay Request API</title>
+    </head>
+    <body>
+		<dl>
+			<dt>paymentAccessToken</dt>
+			<dd>{{ result.info.paymentAccessToken }}</dd>
+			<dt>transactionId</dt>
+			<dd>{{ result.info.transactionId }}</dd>
+			<dt>Access to below paymentUrl to confirm your payment</dt>
+			<dd>
+				<a href="{{ result.info.paymentUrl.web }}" rel="noopener noreferrer">paymentUrl</a>
+			</dd>
+		</dl>
+    </body>
+</html>

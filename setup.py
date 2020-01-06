@@ -16,6 +16,6 @@ setup(
     author_email='sumihiro@gmail.com',
     url='https://github.com/sumihiro3/line-pay-sdk-python',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs', 'requests')),
+    packages=find_packages(exclude=('tests', 'docs', 'requests', 'examples')),
 	install_requires=_requirements(),
 )

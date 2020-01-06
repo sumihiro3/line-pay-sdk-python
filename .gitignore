@@ -1,7 +1,9 @@
 .python-version
 .vscode/
 __pycache__/
+line_pay_sdk.egg-info/
 line_pay.egg-info/
 dist/
 requests/
 sample.py
+.env

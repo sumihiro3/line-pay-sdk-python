@@ -1,0 +1,3 @@
+Flask
+line-pay
+requests >= 2.0
