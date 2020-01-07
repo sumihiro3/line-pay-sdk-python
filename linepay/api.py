@@ -9,7 +9,7 @@ import json
 import requests
 import uuid
 
-from .util import validate_function, LOGGER
+from .util import validate_function_args_return_value, LOGGER
 from .exceptions import InvalidSignatureError, LinePayApiError
 
 
@@ -20,7 +20,7 @@ class LinePayApi(object):
     DEFAULT_API_ENDPOINT = "https://api-pay.line.me"
     SANDBOX_API_ENDPOINT = "https://sandbox-api-pay.line.me"
 
-    @validate_function
+    @validate_function_args_return_value
     def __init__(
         self,
         channel_id: str,
@@ -45,7 +45,7 @@ class LinePayApi(object):
             "Content-Type": "application/json"
         }
 
-    @validate_function
+    @validate_function_args_return_value
     def sign(
         self,
         headers: dict,
@@ -74,14 +74,14 @@ class LinePayApi(object):
         LOGGER.debug(signed_headers)
         return signed_headers
     
-    @validate_function
+    @validate_function_args_return_value
     def _create_nonce(self) -> str:
         """generate nonce for HMAC Authorization
         :rtpye str: generate nonce by uuid4
         """
         return str(uuid.uuid4())
 
-    @validate_function
+    @validate_function_args_return_value
     def request(self, options: dict) -> dict:
         """Method to Request Payment
         :param dict options: LINE Pay Request API Options see https://pay.line.me/jp/developers/apis/onlineApis?locale=ja_JP
@@ -114,7 +114,7 @@ class LinePayApi(object):
                 api_response=result
             )
 
-    @validate_function
+    @validate_function_args_return_value
     def confirm(self, transaction_id: str, amount: float, currency: str) -> dict:
         """Method to Confirm Payment
         :param str transaction_id: Transaction id returned from Request API
@@ -157,7 +157,7 @@ class LinePayApi(object):
                 api_response=result
             )
 
-    @validate_function
+    @validate_function_args_return_value
     def capture(self, transaction_id: str, amount: float, currency: str) -> dict:
         """Method to Capture Payment
         :param str transaction_id: Transaction id returned from Request API
@@ -200,7 +200,7 @@ class LinePayApi(object):
                 api_response=result
             )
 
-    @validate_function
+    @validate_function_args_return_value
     def void(self, transaction_id: str) -> dict:
         """Method to Void Payment
         :param str transaction_id: Transaction id returned from Request API
@@ -235,7 +235,7 @@ class LinePayApi(object):
                 api_response=result
             )
 
-    @validate_function
+    @validate_function_args_return_value
     def refund(self, transaction_id: str, refund_amount: float = 0.0) -> dict:
         """Method to Refund Payment
         :param str transaction_id: Transaction id returned from Request API
@@ -277,7 +277,7 @@ class LinePayApi(object):
             )
 
     @classmethod
-    @validate_function
+    @validate_function_args_return_value
     def is_supported_currency(cls, currency: str) -> bool:
         """Check supported currency or not
         :param str currency: currency type
@@ -290,7 +290,7 @@ class LinePayApi(object):
         return result
     
     @classmethod
-    @validate_function
+    @validate_function_args_return_value
     def round_amount_by_currency(cls, currency: str, amount: float):
         if cls.is_supported_currency(currency) is False:
             raise ValueError("currency[{}] is not supported".format(currency))

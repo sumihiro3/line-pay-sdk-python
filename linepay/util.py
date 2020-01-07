@@ -6,12 +6,12 @@ import logging
 LOGGER = logging.getLogger('linepay')
 
 
-def validate_function(func):
+def validate_function_args_return_value(func):
     """decorator for function arguments and retun value
     :param func:
     :return:
     """
-    def validate_function_wrapper(*args, **kwargs):
+    def validate_function_args_return_value_wrapper(*args, **kwargs):
         sig = inspect.signature(func)
         bound_args = sig.bind(*args, **kwargs)
         # 引数の検証
@@ -40,4 +40,4 @@ def validate_function(func):
                 )
             )
         return results
-    return validate_function_wrapper
+    return validate_function_args_return_value_wrapper
