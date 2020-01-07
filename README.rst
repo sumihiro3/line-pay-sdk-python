@@ -24,9 +24,3 @@ Requirements
 
 -  Python >= 3.6
 
-Installation
-------------
-
-::
-
-    $ pip install line-pay
