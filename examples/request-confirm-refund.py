@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""
+LINE Pay API SDK for Python use example
+
+Request -> Confirm -> Refund
+"""
+
 import logging
 import uuid
 import os
