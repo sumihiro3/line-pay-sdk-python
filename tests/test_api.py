@@ -527,3 +527,57 @@ class TestLinePayApi(unittest.TestCase):
                 currency = "GBP"
                 order_id = "order-1234567890"
                 result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+
+    def test_check_reg_key(self):
+        with patch('linepay.api.requests.get') as get:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            get.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            reg_key = "regkey-1234567890"
+            result = api.check_regkey(reg_key)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments/preapprovedPay/{}/check".format(
+                reg_key
+            )
+            mock_sign.assert_called_once_with(api.headers, path, "")
+
+    def test_check_reg_key_with_creditcard_auth(self):
+        with patch('linepay.api.requests.get') as get:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            get.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            reg_key = "regkey-1234567890"
+            result = api.check_regkey(reg_key, credit_card_auth=True)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments/preapprovedPay/{}/check?creditCardAuth=true".format(
+                reg_key
+            )
+            mock_sign.assert_called_once_with(api.headers, path, "")
+
+    def test_check_reg_key_with_failed_return_code(self):
+        with patch('linepay.api.requests.get') as get:
+            get.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(LinePayApiError):
+                reg_key = "regkey-1234567890"
+                result = api.check_regkey(reg_key)
+
+    def test_check_reg_key_with_none_reg_key(self):
+        with patch('linepay.api.requests.get') as get:
+            get.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = None
+                result = api.check_regkey(reg_key)
+
+    def test_check_reg_key_with_invalid_reg_key(self):
+        with patch('linepay.api.requests.get') as get:
+            get.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = 10
+                result = api.check_regkey(reg_key)

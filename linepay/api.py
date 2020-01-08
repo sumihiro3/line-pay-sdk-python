@@ -355,6 +355,42 @@ class LinePayApi(object):
                 api_response=result
             )
 
+    @validate_function_args_return_value
+    def check_regkey(self, reg_key: str, credit_card_auth: bool = False) -> dict:
+        """Method to Check RegKey
+        :param str reg_key: Reg Key returned from Confirm API
+        :param bool credit_card_auth: Whether credit cards issued with RegKey have authorized minimum amount
+        :rtpye dict: Check RegKey API response
+        """
+        path = "/{api_version}/payments/preapprovedPay/{reg_key}/check".format(
+            api_version=self.LINE_PAY_API_VERSION,
+            reg_key=reg_key
+        )
+        if (credit_card_auth is True):
+            path += "?creditCardAuth=true"
+        url = "{api_endpoint}{path}".format(
+            api_endpoint=self.api_endpoint,
+            path=path
+        )
+        headers = self.sign(self.headers, path, "")
+
+        LOGGER.debug("Going to execute Check RegKey API [URL: %s]", url)
+        response = requests.get(url, headers=headers)
+        result = response.json()
+        LOGGER.debug(result)
+        return_code = result.get("returnCode", None)
+        if return_code == "0000":
+            LOGGER.debug("Check RegKey API Completed!")
+            return result
+        else:
+            LOGGER.debug("Check RegKey API Failed...")
+            raise LinePayApiError(
+                return_code=return_code,
+                status_code=response.status_code,
+                headers=dict(response.headers.items()),
+                api_response=result
+            )
+
 
 class CurrencyType(Enum):
     # LINE Pay API supports USD, JPY, TWD, THB
