@@ -101,6 +101,11 @@ def pay_confirm():
 	logger.debug(response)
 	reg_key = response.get("info", {}).get("regKey", None)
 	CACHE["reg_key"] = reg_key
+	# Check RegKey
+	check_result = api.check_regkey(reg_key)
+	logger.debug(check_result)
+	response["regKeyCheckReturnCode"] = check_result.get("returnCode", None)
+	response["regKeyCheckReturnMessage"] = check_result.get("returnMessage", None)
 	return render_template("confirm-preapproved.html", result=response)
 
 
@@ -118,6 +123,11 @@ def pay_preapproved():
 	# update transaction_id for pre-approved authorized transaction
 	transaction_id = response.get("info", {}).get("transactionId", None)
 	CACHE["transaction_id"] = transaction_id
+	# Check RegKey
+	check_result = api.check_regkey(reg_key)
+	logger.debug(check_result)
+	response["regKeyCheckReturnCode"] = check_result.get("returnCode", None)
+	response["regKeyCheckReturnMessage"] = check_result.get("returnMessage", None)
 	return render_template("capture-preapproved.html", result=response)
 
 
