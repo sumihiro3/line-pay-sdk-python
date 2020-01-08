@@ -20,6 +20,29 @@ class LinePayApi(object):
     DEFAULT_API_ENDPOINT = "https://api-pay.line.me"
     SANDBOX_API_ENDPOINT = "https://sandbox-api-pay.line.me"
 
+    @classmethod
+    @validate_function_args_return_value
+    def is_supported_currency(cls, currency: str) -> bool:
+        """Check supported currency or not
+        :param str currency: currency type
+        :rtype bool: supported currency or not
+        """
+        result = False
+        obj = CurrencyType.__members__.get(currency, None)
+        if obj is not None:
+            result = True
+        return result
+    
+    @classmethod
+    @validate_function_args_return_value
+    def round_amount_by_currency(cls, currency: str, amount: float):
+        if cls.is_supported_currency(currency) is False:
+            raise ValueError("currency[{}] is not supported".format(currency))
+        # If you use JPY. Need to round amount.
+        if (CurrencyType.JPY.value == currency):
+            amount = int(amount)
+        return amount
+
     @validate_function_args_return_value
     def __init__(
         self,
@@ -276,28 +299,62 @@ class LinePayApi(object):
                 api_response=result
             )
 
-    @classmethod
     @validate_function_args_return_value
-    def is_supported_currency(cls, currency: str) -> bool:
-        """Check supported currency or not
-        :param str currency: currency type
-        :rtype bool: supported currency or not
+    def pay_preapproved(
+        self, 
+        reg_key: str, 
+        product_name: str, 
+        amount: float, 
+        currency: str, 
+        order_id: str,
+        capture: bool = True) -> dict:
+        """Method to Pay Preapproved
+        :param str reg_key: RegKey returned from Confirm API
+        :param str product_name: Product name
+        :param float amount: Payment amount
+        :param str currency: Payment currency (ISO 4217) Supported currencies are USD, JPY, TWD and THB
+        :param str order_id: Order id
+        :param bool capture: Capture payment nor not
+        :rtpye dict: Pay Preapproved API response
         """
-        result = False
-        obj = CurrencyType.__members__.get(currency, None)
-        if obj is not None:
-            result = True
-        return result
-    
-    @classmethod
-    @validate_function_args_return_value
-    def round_amount_by_currency(cls, currency: str, amount: float):
-        if cls.is_supported_currency(currency) is False:
-            raise ValueError("currency[{}] is not supported".format(currency))
-        # If you use JPY. Need to round amount.
-        if (CurrencyType.JPY.value == currency):
-            amount = int(amount)
-        return amount
+        if (self.__class__.is_supported_currency(currency) is False):
+            raise ValueError("Currency:[{}] is not supported by LINE Pay".format(currency))
+        path = "/{api_version}/payments/preapprovedPay/{reg_key}/payment".format(
+            api_version=self.LINE_PAY_API_VERSION,
+            reg_key=reg_key
+        )
+        url = "{api_endpoint}{path}".format(
+            api_endpoint=self.api_endpoint,
+            path=path
+        )
+        amount = self.__class__.round_amount_by_currency(currency, amount)
+        options = {
+            "productName": product_name,
+            "amount": amount,
+            "currency": currency,
+            "orderId": order_id,
+            "capture": capture
+        }
+        body_str = json.dumps(options)
+        headers = self.sign(self.headers, path, body_str)
+
+        LOGGER.debug("Going to execute Pay Preapproved API [URL: %s]", url)
+        response = requests.post(url, json.dumps(options), headers=headers)
+        result = response.json()
+        LOGGER.debug(result)
+        return_code = result.get("returnCode", None)
+        if return_code == "0000":
+            LOGGER.debug("Pay Preapproved API Completed!")
+            return result
+        else:
+            LOGGER.debug("Pay Preapproved API Failed...")
+            raise LinePayApiError(
+                return_code=return_code,
+                status_code=response.status_code,
+                headers=dict(response.headers.items()),
+                api_response=result
+            )
+
 
 class CurrencyType(Enum):
     # LINE Pay API supports USD, JPY, TWD, THB

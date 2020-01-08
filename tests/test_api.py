@@ -7,6 +7,27 @@ from linepay.exceptions import LinePayApiError
 
 class TestLinePayApi(unittest.TestCase):
 
+    def test_is_supported_currency(self):
+        self.assertTrue(linepay.LinePayApi.is_supported_currency("USD"))
+        self.assertTrue(linepay.LinePayApi.is_supported_currency("JPY"))
+        self.assertTrue(linepay.LinePayApi.is_supported_currency("TWD"))
+        self.assertTrue(linepay.LinePayApi.is_supported_currency("THB"))
+        self.assertFalse(linepay.LinePayApi.is_supported_currency("GBP"))
+
+    def test_is_supported_currency_with_none(self):
+        with self.assertRaises(ValueError):
+            linepay.LinePayApi.is_supported_currency(None)
+
+    def test_round_amount_by_currency(self):
+        self.assertEqual(1, linepay.LinePayApi.round_amount_by_currency("JPY", 1.0))
+        self.assertEqual(9.99, linepay.LinePayApi.round_amount_by_currency("USD", 9.99))
+        self.assertEqual(9.99, linepay.LinePayApi.round_amount_by_currency("THB", 9.99))
+        self.assertEqual(9.99, linepay.LinePayApi.round_amount_by_currency("TWD", 9.99))
+
+    def test_round_amount_by_currency_with_unsupported_currency(self):
+        with self.assertRaises(ValueError):
+            linepay.LinePayApi.round_amount_by_currency("GBP", 9.99)
+
     def test_constructor(self):
         print("testing constructor.")
         with self.assertRaises(ValueError):
@@ -360,23 +381,149 @@ class TestLinePayApi(unittest.TestCase):
                 amount = "invalid"
                 result = api.refund(transaction_id, refund_amount=amount)
 
-    def test_is_supported_currency(self):
-        self.assertTrue(linepay.LinePayApi.is_supported_currency("USD"))
-        self.assertTrue(linepay.LinePayApi.is_supported_currency("JPY"))
-        self.assertTrue(linepay.LinePayApi.is_supported_currency("TWD"))
-        self.assertTrue(linepay.LinePayApi.is_supported_currency("THB"))
-        self.assertFalse(linepay.LinePayApi.is_supported_currency("GBP"))
+    def test_pay_preapproved(self):
+        with patch('linepay.api.requests.post') as post:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            post.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            reg_key = "regkey-1234567890"
+            product_name = "product-1234567890"
+            amount = 10.0
+            currency = "JPY"
+            order_id = "order-1234567890"
+            result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments/preapprovedPay/{}/payment".format(
+                reg_key
+            )
+            request_options = {
+                "productName": product_name,
+                "amount": int(amount),
+                "currency": currency,
+                "orderId": order_id,
+                "capture": True
+            }
+            mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
 
-    def test_is_supported_currency_with_none(self):
-        with self.assertRaises(ValueError):
-            linepay.LinePayApi.is_supported_currency(None)
+    def test_pay_preapproved_with_authorization(self):
+        with patch('linepay.api.requests.post') as post:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            post.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            reg_key = "regkey-1234567890"
+            product_name = "product-1234567890"
+            amount = 10.0
+            currency = "JPY"
+            order_id = "order-1234567890"
+            result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id, capture=False)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments/preapprovedPay/{}/payment".format(
+                reg_key
+            )
+            request_options = {
+                "productName": product_name,
+                "amount": int(amount),
+                "currency": currency,
+                "orderId": order_id,
+                "capture": False
+            }
+            mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
 
-    def test_round_amount_by_currency(self):
-        self.assertEqual(1, linepay.LinePayApi.round_amount_by_currency("JPY", 1.0))
-        self.assertEqual(9.99, linepay.LinePayApi.round_amount_by_currency("USD", 9.99))
-        self.assertEqual(9.99, linepay.LinePayApi.round_amount_by_currency("THB", 9.99))
-        self.assertEqual(9.99, linepay.LinePayApi.round_amount_by_currency("TWD", 9.99))
+    def test_pay_preapproved_with_failed_return_code(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1104"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(LinePayApiError):
+                reg_key = "regkey-1234567890"
+                product_name = "product-1234567890"
+                amount = 10.0
+                currency = "JPY"
+                order_id = "order-1234567890"
+                result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
 
-    def test_round_amount_by_currency_with_unsupported_currency(self):
-        with self.assertRaises(ValueError):
-            linepay.LinePayApi.round_amount_by_currency("GBP", 9.99)
+    def test_pay_preapproved_with_none_reg_key(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = None
+                product_name = "product-1234567890"
+                amount = 10.0
+                currency = "JPY"
+                order_id = "order-1234567890"
+                result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+
+    def test_pay_preapproved_with_invalid_reg_key(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = 9999
+                product_name = "product-1234567890"
+                amount = 10.0
+                currency = "JPY"
+                order_id = "order-1234567890"
+                result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+
+    def test_pay_preapproved_with_none_product_name(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = "regkey-1234567890"
+                product_name = None
+                amount = 10.0
+                currency = "JPY"
+                order_id = "order-1234567890"
+                result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+
+    def test_pay_preapproved_with_invalid_product_name(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = "regkey-1234567890"
+                product_name = 9999
+                amount = 10.0
+                currency = "JPY"
+                order_id = "order-1234567890"
+                result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+
+    def test_pay_preapproved_with_invalid_amount(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = "regkey-1234567890"
+                product_name = 9999
+                amount = "invalid amount"
+                currency = "JPY"
+                order_id = "order-1234567890"
+                result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+
+    def test_pay_preapproved_with_none_currency(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = "regkey-1234567890"
+                product_name = 9999
+                amount = 10.0
+                currency = None
+                order_id = "order-1234567890"
+                result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+
+    def test_pay_preapproved_with_not_supported_currency(self):
+        with patch('linepay.api.requests.post') as post:
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = "regkey-1234567890"
+                product_name = 9999
+                amount = 10.0
+                currency = "GBP"
+                order_id = "order-1234567890"
+                result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
