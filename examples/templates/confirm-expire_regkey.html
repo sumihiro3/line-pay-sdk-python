@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<title>LINE Pay Confirm API Result</title>
+    </head>
+    <body>
+		<dl>
+			<dt>orderId</dt>
+			<dd>{{ result.info.orderId }}</dd>
+			<dt>transactionId</dt>
+			<dd>{{ result.info.transactionId }}</dd>
+			<dt>product name</dt>
+			<dd>{{ result.info.packages[0].products[0].name }}</dd>
+			<dt>price</dt>
+			<dd>{{ result.info.packages[0].products[0].price }}</dd>
+			<dt>regKey</dt>
+			<dd>{{ result.info.regKey }}</dd>
+			<dt>regKey Check Return Code</dt>
+			<dd>{{ result.regKeyCheckReturnCode }}</dd>
+			<dt>regKey Check Return Message</dt>
+			<dd>{{ result.regKeyCheckReturnMessage }}</dd>
+			<dt>Access to below link to execute Pay Preapproved</dt>
+			<dd>
+				<a href="/expire_regkey" rel="noopener noreferrer">Expire RegKey</a>
+			</dd>
+		</dl>
+    </body>
+</html>
