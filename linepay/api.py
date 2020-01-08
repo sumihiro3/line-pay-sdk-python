@@ -19,6 +19,7 @@ class LinePayApi(object):
     LINE_PAY_API_VERSION = "v3"
     DEFAULT_API_ENDPOINT = "https://api-pay.line.me"
     SANDBOX_API_ENDPOINT = "https://sandbox-api-pay.line.me"
+    CHECK_REGKEY_SAFE_RETURN_CODE_LIST = ["0000", "1190", "1193"]
 
     @classmethod
     @validate_function_args_return_value
@@ -379,11 +380,46 @@ class LinePayApi(object):
         result = response.json()
         LOGGER.debug(result)
         return_code = result.get("returnCode", None)
-        if return_code == "0000":
+        if return_code in self.CHECK_REGKEY_SAFE_RETURN_CODE_LIST:
             LOGGER.debug("Check RegKey API Completed!")
             return result
         else:
             LOGGER.debug("Check RegKey API Failed...")
+            raise LinePayApiError(
+                return_code=return_code,
+                status_code=response.status_code,
+                headers=dict(response.headers.items()),
+                api_response=result
+            )
+
+    @validate_function_args_return_value
+    def expire_regkey(self, reg_key: str) -> dict:
+        """Method to Expire RegKey
+        :param str reg_key: Reg Key returned from Confirm API
+        :rtpye dict: Expire RegKey API response
+        """
+        path = "/{api_version}/payments/preapprovedPay/{reg_key}/expire".format(
+            api_version=self.LINE_PAY_API_VERSION,
+            reg_key=reg_key
+        )
+        url = "{api_endpoint}{path}".format(
+            api_endpoint=self.api_endpoint,
+            path=path
+        )
+        options = {}
+        body_str = json.dumps(options)
+        headers = self.sign(self.headers, path, body_str)
+
+        LOGGER.debug("Going to execute Expire RegKey API [URL: %s]", url)
+        response = requests.post(url, json.dumps(options), headers=headers)
+        result = response.json()
+        LOGGER.debug(result)
+        return_code = result.get("returnCode", None)
+        if return_code == "0000":
+            LOGGER.debug("Expire RegKey API Completed!")
+            return result
+        else:
+            LOGGER.debug("Expire RegKey API Failed...")
             raise LinePayApiError(
                 return_code=return_code,
                 status_code=response.status_code,

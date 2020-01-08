@@ -558,6 +558,36 @@ class TestLinePayApi(unittest.TestCase):
             )
             mock_sign.assert_called_once_with(api.headers, path, "")
 
+    def test_check_reg_key_with_safe_return_code_1190(self):
+        with patch('linepay.api.requests.get') as get:
+            mock_api_result = MagicMock(return_value={"returnCode": "1190"})
+            get.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            reg_key = "regkey-1234567890"
+            result = api.check_regkey(reg_key)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments/preapprovedPay/{}/check".format(
+                reg_key
+            )
+            mock_sign.assert_called_once_with(api.headers, path, "")
+
+    def test_check_reg_key_with_safe_return_code_1193(self):
+        with patch('linepay.api.requests.get') as get:
+            mock_api_result = MagicMock(return_value={"returnCode": "1193"})
+            get.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            reg_key = "regkey-1234567890"
+            result = api.check_regkey(reg_key)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments/preapprovedPay/{}/check".format(
+                reg_key
+            )
+            mock_sign.assert_called_once_with(api.headers, path, "")
+
     def test_check_reg_key_with_failed_return_code(self):
         with patch('linepay.api.requests.get') as get:
             get.return_value.json = MagicMock(return_value={"returnCode": "1101"})
@@ -581,3 +611,43 @@ class TestLinePayApi(unittest.TestCase):
             with self.assertRaises(ValueError):
                 reg_key = 10
                 result = api.check_regkey(reg_key)
+
+    def test_expire_regkey(self):
+        with patch('linepay.api.requests.post') as post:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            post.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            reg_key = "regkey-1234567890"
+            result = api.expire_regkey(reg_key)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments/preapprovedPay/{}/expire".format(
+                reg_key
+            )
+            request_options = {}
+            mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
+
+    def test_expire_regkey_with_failed_return_code(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1104"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(LinePayApiError):
+                reg_key = "regkey-1234567890"
+                result = api.expire_regkey(reg_key)
+
+    def test_expire_regkey_with_none_regkey(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = None
+                result = api.expire_regkey(reg_key)
+
+    def test_expire_regkey_with_invalid_regkey(self):
+        with patch('linepay.api.requests.post') as post:
+            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(ValueError):
+                reg_key = 9999
+                result = api.expire_regkey(reg_key)
