@@ -20,6 +20,7 @@ class LinePayApi(object):
     DEFAULT_API_ENDPOINT = "https://api-pay.line.me"
     SANDBOX_API_ENDPOINT = "https://sandbox-api-pay.line.me"
     CHECK_REGKEY_SAFE_RETURN_CODE_LIST = ["0000", "1190", "1193"]
+    CHECK_PAYMENT_STATUS_SAFE_RETURN_CODE_LIST = ["0000", "0110", "0121", "0122", "0123"]
 
     @classmethod
     @validate_function_args_return_value
@@ -420,6 +421,39 @@ class LinePayApi(object):
             return result
         else:
             LOGGER.debug("Expire RegKey API Failed...")
+            raise LinePayApiError(
+                return_code=return_code,
+                status_code=response.status_code,
+                headers=dict(response.headers.items()),
+                api_response=result
+            )
+
+    @validate_function_args_return_value
+    def check_payment_status(self, transaction_id: str) -> dict:
+        """Method to Check Payment Status
+        :param str transaction_id: TransactionId returned from Request API
+        :rtpye dict: Check Payment Status API response
+        """
+        path = "/{api_version}/payments/requests/{transaction_id}/check".format(
+            api_version=self.LINE_PAY_API_VERSION,
+            transaction_id=transaction_id
+        )
+        url = "{api_endpoint}{path}".format(
+            api_endpoint=self.api_endpoint,
+            path=path
+        )
+        headers = self.sign(self.headers, path, "")
+
+        LOGGER.debug("Going to execute Check Payment Status API [URL: %s]", url)
+        response = requests.get(url, headers=headers)
+        result = response.json()
+        LOGGER.debug(result)
+        return_code = result.get("returnCode", None)
+        if return_code in self.CHECK_PAYMENT_STATUS_SAFE_RETURN_CODE_LIST:
+            LOGGER.debug("Check Payment Status API Completed!")
+            return result
+        else:
+            LOGGER.debug("Check Payment Status API Failed...")
             raise LinePayApiError(
                 return_code=return_code,
                 status_code=response.status_code,
