@@ -9,6 +9,10 @@
 			<dd>{{ result.info.paymentAccessToken }}</dd>
 			<dt>transactionId</dt>
 			<dd>{{ result.info.transactionId }}</dd>
+			<dt>Payment Status Check Return Code</dt>
+			<dd>{{ result.paymentStatusCheckReturnCode }}</dd>
+			<dt>Payment Status Check Return Message</dt>
+			<dd>{{ result.paymentStatusCheckReturnMessage }}</dd>
 			<dt>Access to below paymentUrl to confirm your payment</dt>
 			<dd>
 				<a href="{{ result.info.paymentUrl.web }}" rel="noopener noreferrer">paymentUrl</a>

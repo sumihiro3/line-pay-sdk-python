@@ -78,6 +78,13 @@ def pay_request():
 	logger.debug(request_options)
 	response = api.request(request_options)
 	logger.debug(response)
+	# Check Payment Satus
+	transaction_id = str(response.get("info", {}).get("transactionId", 0))
+	check_result = api.check_payment_status(transaction_id)
+	logger.debug(check_result)
+	response["transaction_id"] = transaction_id
+	response["paymentStatusCheckReturnCode"] = check_result.get("returnCode", None)
+	response["paymentStatusCheckReturnMessage"] = check_result.get("returnMessage", None)
 	return render_template("request.html", result=response)
 
 
@@ -92,6 +99,12 @@ def pay_confirm():
 		CACHE.get("currency", "JPY")
 	)
 	logger.debug(response)
+	# Check Payment Satus
+	check_result = api.check_payment_status(transaction_id)
+	logger.debug(check_result)
+	response["transaction_id"] = transaction_id
+	response["paymentStatusCheckReturnCode"] = check_result.get("returnCode", None)
+	response["paymentStatusCheckReturnMessage"] = check_result.get("returnMessage", None)
 	return render_template("confirm.html", result=response)
 
 
