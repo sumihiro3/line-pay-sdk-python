@@ -748,3 +748,55 @@ class TestLinePayApi(unittest.TestCase):
             with self.assertRaises(ValueError):
                 transaction_id = 9999
                 result = api.check_payment_status(transaction_id)
+
+    def test_payment_details(self):
+        with patch('linepay.api.requests.get') as get:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            get.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            transaction_id = "transaction-1234567890"
+            result = api.payment_details()
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments".format(
+                transaction_id
+            )
+            mock_sign.assert_called_once_with(api.headers, path, "")
+
+    def test_payment_details_with_transaction_id(self):
+        with patch('linepay.api.requests.get') as get:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            get.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            transaction_id = "transaction-1234567890"
+            result = api.payment_details(transaction_id=transaction_id)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments?transactionId={}".format(
+                transaction_id
+            )
+            mock_sign.assert_called_once_with(api.headers, path, "")
+
+    def test_payment_details_with_order_id(self):
+        with patch('linepay.api.requests.get') as get:
+            mock_api_result = MagicMock(return_value={"returnCode": "0000"})
+            get.return_value.json = mock_api_result
+            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            api.sign = mock_sign
+            order_id = "order-1234567890"
+            result = api.payment_details(order_id=order_id)
+            self.assertEqual(result, mock_api_result.return_value)
+            path = "/v3/payments?orderId={}".format(
+                order_id
+            )
+            mock_sign.assert_called_once_with(api.headers, path, "")
+
+    def test_payment_details_with_failed_return_code(self):
+        with patch('linepay.api.requests.get') as get:
+            get.return_value.json = MagicMock(return_value={"returnCode": "1104"})
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            with self.assertRaises(LinePayApiError):
+                result = api.payment_details()
