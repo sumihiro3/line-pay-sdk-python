@@ -1,3 +1,4 @@
 Flask==1.1.1
 line-pay==0.0.1
 requests==2.22.0
+python-dotenv==0.10.3
