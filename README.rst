@@ -1,7 +1,6 @@
 LINE Pay API SDK for Python
 =================================
 
-|Build Status| |PyPI version| |Documentation Status|
 
 SDK of the LINE Pay API for Python.
 
@@ -10,8 +9,8 @@ Introduction
 The LINE Pay API SDK for Python makes it easy to develop apps using LINE Pay API.
 
 
-Documentation
--------------
+API Documentation
+-----------------
 
 See the official API documentation for more information
 
@@ -24,3 +23,20 @@ Requirements
 
 -  Python >= 3.6
 
+Installation
+------------
+
+::
+
+    $ pip install line-pay
+
+Hints
+-----
+
+Examples
+~~~~~~~~
+
+`Example usage <https://github.com/sumihiro3/line-pay-sdk-python/tree/master/examples>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Example using `Flask <http://flask.pocoo.org/>`__

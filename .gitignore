@@ -3,6 +3,7 @@
 __pycache__/
 line_pay_sdk.egg-info/
 line_pay.egg-info/
+build/
 dist/
 requests/
 sample*.py
