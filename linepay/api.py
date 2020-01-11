@@ -10,7 +10,7 @@ import requests
 import uuid
 
 from .util import validate_function_args_return_value, LOGGER
-from .exceptions import InvalidSignatureError, LinePayApiError
+from .exceptions import LinePayApiError
 
 
 class LinePayApi(object):
