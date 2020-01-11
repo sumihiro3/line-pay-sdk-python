@@ -1,17 +1,17 @@
 LINE Pay API SDK for Python
 =================================
 
-.. image:: https://img.shields.io/pypi/v/pay.svg
+.. image:: https://img.shields.io/pypi/v/line-pay.svg
     :target: https://pypi.python.org/pypi/line-pay/
     :alt: Latest Version
 
-.. image:: https://img.shields.io/pypi/wheel/pay.svg
+.. image:: https://img.shields.io/pypi/wheel/line-pay.svg
     :target: https://pypi.python.org/pypi/line-pay/
 
-.. image:: https://img.shields.io/pypi/pyversions/pay.svg
+.. image:: https://img.shields.io/pypi/pyversions/line-pay.svg
     :target: https://pypi.python.org/pypi/line-pay/
 
-.. image:: https://img.shields.io/pypi/l/pay.svg
+.. image:: https://img.shields.io/pypi/l/line-pay.svg
     :target: https://pypi.python.org/pypi/line-pay/
 
 
