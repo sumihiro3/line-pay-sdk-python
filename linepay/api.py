@@ -140,9 +140,9 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def confirm(self, transaction_id: str, amount: float, currency: str) -> dict:
+    def confirm(self, transaction_id: int, amount: float, currency: str) -> dict:
         """Method to Confirm Payment
-        :param str transaction_id: Transaction id returned from Request API
+        :param int transaction_id: Transaction id returned from Request API
         :param float amount: Payment amount
         :param str currency: Payment currency (ISO 4217) Supported currencies are USD, JPY, TWD and THB
         :rtpye dict: Confirm API response
@@ -151,7 +151,7 @@ class LinePayApi(object):
             raise ValueError("Currency:[{}] is not supported by LINE Pay".format(currency))
         path = "/{api_version}/payments/{transaction_id}/confirm".format(
             api_version=self.LINE_PAY_API_VERSION,
-            transaction_id=transaction_id
+            transaction_id=str(transaction_id)
         )
         url = "{api_endpoint}{path}".format(
             api_endpoint=self.api_endpoint,
@@ -183,9 +183,9 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def capture(self, transaction_id: str, amount: float, currency: str) -> dict:
+    def capture(self, transaction_id: int, amount: float, currency: str) -> dict:
         """Method to Capture Payment
-        :param str transaction_id: Transaction id returned from Request API
+        :param int transaction_id: Transaction id returned from Request API
         :param float amount: Payment amount
         :param str currency: Payment currency (ISO 4217) Supported currencies are USD, JPY, TWD and THB
         :rtpye dict: Capture API response
@@ -194,7 +194,7 @@ class LinePayApi(object):
             raise ValueError("Currency:[{}] is not supported by LINE Pay".format(currency))
         path = "/{api_version}/payments/authorizations/{transaction_id}/capture".format(
             api_version=self.LINE_PAY_API_VERSION,
-            transaction_id=transaction_id
+            transaction_id=str(transaction_id)
         )
         url = "{api_endpoint}{path}".format(
             api_endpoint=self.api_endpoint,
@@ -226,14 +226,14 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def void(self, transaction_id: str) -> dict:
+    def void(self, transaction_id: int) -> dict:
         """Method to Void Payment
-        :param str transaction_id: Transaction id returned from Request API
+        :param int transaction_id: Transaction id returned from Request API
         :rtpye dict: Void API response
         """
         path = "/{api_version}/payments/authorizations/{transaction_id}/void".format(
             api_version=self.LINE_PAY_API_VERSION,
-            transaction_id=transaction_id
+            transaction_id=str(transaction_id)
         )
         url = "{api_endpoint}{path}".format(
             api_endpoint=self.api_endpoint,
@@ -261,15 +261,15 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def refund(self, transaction_id: str, refund_amount: float = 0.0) -> dict:
+    def refund(self, transaction_id: int, refund_amount: float = 0.0) -> dict:
         """Method to Refund Payment
-        :param str transaction_id: Transaction id returned from Request API
+        :param int transaction_id: Transaction id returned from Request API
         :param float refund_amount: Refund amount. Full refund if not returned
         :rtpye dict: Refund API response
         """
         path = "/{api_version}/payments/{transaction_id}/refund".format(
             api_version=self.LINE_PAY_API_VERSION,
-            transaction_id=transaction_id
+            transaction_id=str(transaction_id)
         )
         url = "{api_endpoint}{path}".format(
             api_endpoint=self.api_endpoint,
@@ -429,14 +429,14 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def check_payment_status(self, transaction_id: str) -> dict:
+    def check_payment_status(self, transaction_id: int) -> dict:
         """Method to Check Payment Status
-        :param str transaction_id: TransactionId returned from Request API
+        :param int transaction_id: TransactionId returned from Request API
         :rtpye dict: Check Payment Status API response
         """
         path = "/{api_version}/payments/requests/{transaction_id}/check".format(
             api_version=self.LINE_PAY_API_VERSION,
-            transaction_id=transaction_id
+            transaction_id=str(transaction_id)
         )
         url = "{api_endpoint}{path}".format(
             api_endpoint=self.api_endpoint,
@@ -462,9 +462,9 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def payment_details(self, transaction_id: str = None, order_id: str = None) -> dict:
+    def payment_details(self, transaction_id: int = None, order_id: str = None) -> dict:
         """Method to Payment Details
-        :param str transaction_id: Payment or refund transaction ID generated by LINE Pay
+        :param int transaction_id: Payment or refund transaction ID generated by LINE Pay
         :param str order_id: Order ID of the merchant
         :rtpye dict: Payment Details API response
         """
@@ -472,7 +472,7 @@ class LinePayApi(object):
             api_version=self.LINE_PAY_API_VERSION
         )
         if transaction_id is not None:
-            path += "transactionId={}&".format(transaction_id)
+            path += "transactionId={}&".format(str(transaction_id))
         if order_id is not None:
             path += "orderId={}".format(order_id)
         if path.endswith("?") or path.endswith("&"):

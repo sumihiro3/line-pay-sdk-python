@@ -86,7 +86,7 @@ def pay_request():
 	response = api.request(request_options)
 	logger.debug(response)
 	# Check Payment Satus
-	transaction_id = str(response.get("info", {}).get("transactionId", 0))
+	transaction_id = int(response.get("info", {}).get("transactionId", 0))
 	check_result = api.check_payment_status(transaction_id)
 	logger.debug(check_result)
 	response["transaction_id"] = transaction_id
@@ -97,7 +97,7 @@ def pay_request():
 
 @app.route("/confirm", methods=['GET'])
 def pay_confirm():
-	transaction_id = request.args.get('transactionId')
+	transaction_id = int(request.args.get('transactionId'))
 	logger.debug("transaction_id: %s", str(transaction_id))
 	CACHE["transaction_id"] = transaction_id
 	response = api.confirm(

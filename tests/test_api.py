@@ -120,7 +120,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             amount = 10.0
             currency = "JPY"
             result = api.confirm(transaction_id, amount, currency)
@@ -139,7 +139,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(LinePayApiError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 amount = 10.0
                 currency = "JPY"
                 result = api.confirm(transaction_id, amount, currency)
@@ -159,7 +159,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = 10
+                transaction_id = "invalid!!"
                 amount = 10.0
                 currency = "JPY"
                 result = api.confirm(transaction_id, amount, currency)
@@ -169,7 +169,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 amount = 99
                 currency = "JPY"
                 result = api.confirm(transaction_id, amount, currency)
@@ -179,7 +179,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 amount = 1.0
                 currency = None
                 result = api.confirm(transaction_id, amount, currency)
@@ -188,7 +188,7 @@ class TestLinePayApi(unittest.TestCase):
         with patch('linepay.api.requests.post') as post:
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 amount = 1.0
                 currency = "GBP"
                 result = api.confirm(transaction_id, amount, currency)
@@ -200,7 +200,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             amount = 10.0
             currency = "JPY"
             result = api.capture(transaction_id, amount, currency)
@@ -219,7 +219,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1104"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(LinePayApiError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 amount = 10.0
                 currency = "JPY"
                 result = api.capture(transaction_id, amount, currency)
@@ -239,7 +239,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = 10
+                transaction_id = "invalid"
                 amount = 10.0
                 currency = "JPY"
                 result = api.capture(transaction_id, amount, currency)
@@ -249,7 +249,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 amount = 99
                 currency = "JPY"
                 result = api.capture(transaction_id, amount, currency)
@@ -259,7 +259,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 amount = 1.0
                 currency = None
                 result = api.capture(transaction_id, amount, currency)
@@ -268,7 +268,7 @@ class TestLinePayApi(unittest.TestCase):
         with patch('linepay.api.requests.post') as post:
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 amount = 1.0
                 currency = "GBP"
                 result = api.capture(transaction_id, amount, currency)
@@ -280,7 +280,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             result = api.void(transaction_id)
             self.assertEqual(result, mock_api_result.return_value)
             path = "/v3/payments/authorizations/{}/void".format(
@@ -294,7 +294,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1104"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(LinePayApiError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 result = api.void(transaction_id)
 
     def test_void_with_none_transaction_id(self):
@@ -310,7 +310,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = 10
+                transaction_id = "invalid"
                 result = api.void(transaction_id)
 
     def test_refund(self):
@@ -320,7 +320,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             amount = 10.0
             result = api.refund(transaction_id, refund_amount=amount)
             self.assertEqual(result, mock_api_result.return_value)
@@ -339,7 +339,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             result = api.refund(transaction_id)
             self.assertEqual(result, mock_api_result.return_value)
             path = "/v3/payments/{}/refund".format(
@@ -353,7 +353,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(LinePayApiError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 result = api.refund(transaction_id)
 
     def test_refund_with_none_transaction_id(self):
@@ -369,7 +369,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1150"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = 10
+                transaction_id = "invalid"
                 result = api.refund(transaction_id)
 
     def test_refund_with_invalid_amount(self):
@@ -377,7 +377,7 @@ class TestLinePayApi(unittest.TestCase):
             post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 amount = "invalid"
                 result = api.refund(transaction_id, refund_amount=amount)
 
@@ -659,7 +659,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             result = api.check_payment_status(transaction_id)
             self.assertEqual(result, mock_api_result.return_value)
             path = "/v3/payments/requests/{}/check".format(
@@ -674,7 +674,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             result = api.check_payment_status(transaction_id)
             self.assertEqual(result, mock_api_result.return_value)
             path = "/v3/payments/requests/{}/check".format(
@@ -689,7 +689,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             result = api.check_payment_status(transaction_id)
             self.assertEqual(result, mock_api_result.return_value)
             path = "/v3/payments/requests/{}/check".format(
@@ -704,7 +704,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             result = api.check_payment_status(transaction_id)
             self.assertEqual(result, mock_api_result.return_value)
             path = "/v3/payments/requests/{}/check".format(
@@ -719,7 +719,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             result = api.check_payment_status(transaction_id)
             self.assertEqual(result, mock_api_result.return_value)
             path = "/v3/payments/requests/{}/check".format(
@@ -732,7 +732,7 @@ class TestLinePayApi(unittest.TestCase):
             get.return_value.json = MagicMock(return_value={"returnCode": "1104"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(LinePayApiError):
-                transaction_id = "transaction-1234567890"
+                transaction_id = 1234567890
                 result = api.check_payment_status(transaction_id)
 
     def test_payment_status_with_none_transaction_id(self):
@@ -746,7 +746,7 @@ class TestLinePayApi(unittest.TestCase):
         with patch('linepay.api.requests.get') as get:
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
-                transaction_id = 9999
+                transaction_id = "invalid"
                 result = api.check_payment_status(transaction_id)
 
     def test_payment_details(self):
@@ -756,7 +756,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             result = api.payment_details()
             self.assertEqual(result, mock_api_result.return_value)
             path = "/v3/payments".format(
@@ -771,7 +771,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             api.sign = mock_sign
-            transaction_id = "transaction-1234567890"
+            transaction_id = 1234567890
             result = api.payment_details(transaction_id=transaction_id)
             self.assertEqual(result, mock_api_result.return_value)
             path = "/v3/payments?transactionId={}".format(
