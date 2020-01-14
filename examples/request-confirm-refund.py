@@ -105,6 +105,10 @@ def pay_confirm():
 	response["transaction_id"] = transaction_id
 	response["paymentStatusCheckReturnCode"] = check_result.get("returnCode", None)
 	response["paymentStatusCheckReturnMessage"] = check_result.get("returnMessage", None)
+	# Payment Detail
+	payment_details = api.payment_details(transaction_id=transaction_id)
+	logger.debug(payment_details)
+	response["payment_details"] = payment_details
 	return render_template("confirm.html", result=response)
 
 
