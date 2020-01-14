@@ -80,7 +80,7 @@ class LinePayApi(object):
         """generate signature method
         :param dict headers: Request HTTP Headers
         :param str path: API request path
-        :param str body: API request body
+        :param str body: API request body for POST Request or Query String (Without "?") for GET Request
         :rtpye dict: signed headers
         """
         LOGGER.debug("path: %s", path)
@@ -468,20 +468,30 @@ class LinePayApi(object):
         :param str order_id: Order ID of the merchant
         :rtpye dict: Payment Details API response
         """
-        path = "/{api_version}/payments?".format(
+        path = "/{api_version}/payments".format(
             api_version=self.LINE_PAY_API_VERSION
         )
+        # build QueryString
+        query = ""
         if transaction_id is not None:
-            path += "transactionId={}&".format(str(transaction_id))
+            query += "transactionId={}&".format(str(transaction_id))
         if order_id is not None:
-            path += "orderId={}".format(order_id)
-        if path.endswith("?") or path.endswith("&"):
-            path = path[:-1]
-        url = "{api_endpoint}{path}".format(
-            api_endpoint=self.api_endpoint,
-            path=path
-        )
-        headers = self.sign(self.headers, path, "")
+            query += "orderId={}".format(order_id)
+        if query.endswith("?") or query.endswith("&"):
+            query = query[:-1]
+        # build URL
+        if query == "":
+            url = "{api_endpoint}{path}".format(
+                api_endpoint=self.api_endpoint,
+                path=path
+            )
+        else:
+            url = "{api_endpoint}{path}?{query}".format(
+                api_endpoint=self.api_endpoint,
+                path=path,
+                query=query
+            )
+        headers = self.sign(self.headers, path, query)
         LOGGER.debug("Going to execute Payment Details API [URL: %s]", url)
         response = requests.get(url, headers=headers)
         result = response.json()
