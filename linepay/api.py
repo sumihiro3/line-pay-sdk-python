@@ -368,13 +368,22 @@ class LinePayApi(object):
             api_version=self.LINE_PAY_API_VERSION,
             reg_key=reg_key
         )
+        # build QueryString
+        query = ""
         if (credit_card_auth is True):
-            path += "?creditCardAuth=true"
-        url = "{api_endpoint}{path}".format(
-            api_endpoint=self.api_endpoint,
-            path=path
-        )
-        headers = self.sign(self.headers, path, "")
+            query = "creditCardAuth=true"
+        if query == "":
+            url = "{api_endpoint}{path}".format(
+                api_endpoint=self.api_endpoint,
+                path=path
+            )
+        else:
+            url = "{api_endpoint}{path}?{query}".format(
+                api_endpoint=self.api_endpoint,
+                path=path,
+                query=query
+            )
+        headers = self.sign(self.headers, path, query)
 
         LOGGER.debug("Going to execute Check RegKey API [URL: %s]", url)
         response = requests.get(url, headers=headers)

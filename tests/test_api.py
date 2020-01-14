@@ -553,10 +553,11 @@ class TestLinePayApi(unittest.TestCase):
             reg_key = "regkey-1234567890"
             result = api.check_regkey(reg_key, credit_card_auth=True)
             self.assertEqual(result, mock_api_result.return_value)
-            path = "/v3/payments/preapprovedPay/{}/check?creditCardAuth=true".format(
+            path = "/v3/payments/preapprovedPay/{}/check".format(
                 reg_key
             )
-            mock_sign.assert_called_once_with(api.headers, path, "")
+            query = "creditCardAuth=true"
+            mock_sign.assert_called_once_with(api.headers, path, query)
 
     def test_check_reg_key_with_safe_return_code_1190(self):
         with patch('linepay.api.requests.get') as get:
