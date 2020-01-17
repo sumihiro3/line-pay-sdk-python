@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 import linepay
 from linepay.exceptions import LinePayApiError
-
+from copy import deepcopy
 
 class TestLinePayApi(unittest.TestCase):
 
@@ -88,15 +88,34 @@ class TestLinePayApi(unittest.TestCase):
 
     def test_request(self):
         with patch('linepay.api.requests.post') as post:
+            # setup mocks
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            signed_header = deepcopy(api.headers)
+            signed_header["X-LINE-Authorization"] = "dummy"
+            mock_sign = MagicMock(return_value=signed_header)
+            api.sign = mock_sign
             mock_api_result = MagicMock(return_value={"returnCode": "0000"})
             post.return_value.json = mock_api_result
-            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
-            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
-            api.sign = mock_sign
             request_options = {"hoge": "fuga"}
+            expected_path = "/v3/payments/request"
+            expected_url = "{api_endpoint}{path}".format(
+                api_endpoint=api.SANDBOX_API_ENDPOINT,
+                path=expected_path
+            )
+            # execute
             result = api.request(request_options)
+            # assert
             self.assertEqual(result, mock_api_result.return_value)
-            mock_sign.assert_called_once_with(api.headers, "/v3/payments/request", json.dumps(request_options))
+            mock_sign.assert_called_once_with(
+                api.headers, 
+                expected_path, 
+                json.dumps(request_options)
+            )
+            post.assert_called_once_with(
+                expected_url, 
+                json.dumps(request_options), 
+                headers=signed_header
+            )
 
     def test_request_with_invalid_param(self):
         with patch('linepay.api.requests.post') as post:
