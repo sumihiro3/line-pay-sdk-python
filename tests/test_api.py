@@ -281,74 +281,117 @@ class TestLinePayApi(unittest.TestCase):
 
     def test_capture(self):
         with patch('linepay.api.requests.post') as post:
+            # setup mocks
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            signed_header = deepcopy(api.headers)
+            signed_header["X-LINE-Authorization"] = "dummy"
+            mock_sign = MagicMock(return_value=signed_header)
+            api.sign = mock_sign
             mock_api_result = MagicMock(return_value={"returnCode": "0000"})
             post.return_value.json = mock_api_result
-            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
-            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
-            api.sign = mock_sign
             transaction_id = 1234567890
             amount = 10.0
             currency = "JPY"
-            result = api.capture(transaction_id, amount, currency)
-            self.assertEqual(result, mock_api_result.return_value)
-            path = "/v3/payments/authorizations/{}/capture".format(
+            expected_path = "/v3/payments/authorizations/{}/capture".format(
                 transaction_id
+            )
+            expected_url = "{api_endpoint}{path}".format(
+                api_endpoint=api.SANDBOX_API_ENDPOINT,
+                path=expected_path
             )
             request_options = {
                 "amount": int(amount),
                 "currency": currency
             }
-            mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
+            # execute
+            result = api.capture(transaction_id, amount, currency)
+            # assert
+            self.assertEqual(result, mock_api_result.return_value)
+            mock_sign.assert_called_once_with(
+                api.headers, expected_path, json.dumps(request_options)
+            )
+            post.assert_called_once_with(
+                expected_url, 
+                json.dumps(request_options), 
+                headers=signed_header
+            )
 
     def test_capture_with_failed_return_code(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1104"})
+            # setup mocks
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            signed_header = deepcopy(api.headers)
+            signed_header["X-LINE-Authorization"] = "dummy"
+            mock_sign = MagicMock(return_value=signed_header)
+            api.sign = mock_sign
+            mock_api_result = MagicMock(return_value={"returnCode": "1104"})
+            post.return_value.json = mock_api_result
+            transaction_id = 1234567890
+            amount = 10.0
+            currency = "JPY"
+            expected_path = "/v3/payments/authorizations/{}/capture".format(
+                transaction_id
+            )
+            expected_url = "{api_endpoint}{path}".format(
+                api_endpoint=api.SANDBOX_API_ENDPOINT,
+                path=expected_path
+            )
+            request_options = {
+                "amount": int(amount),
+                "currency": currency
+            }
+            # execute
             with self.assertRaises(LinePayApiError):
-                transaction_id = 1234567890
-                amount = 10.0
-                currency = "JPY"
                 result = api.capture(transaction_id, amount, currency)
+            # assert
+            mock_sign.assert_called_once_with(
+                api.headers, expected_path, json.dumps(request_options)
+            )
+            post.assert_called_once_with(
+                expected_url, 
+                json.dumps(request_options), 
+                headers=signed_header
+            )
 
     def test_capture_with_none_transaction_id(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
                 transaction_id = None
                 amount = 10.0
                 currency = "JPY"
                 result = api.capture(transaction_id, amount, currency)
+            post.assert_not_called()
 
     def test_capture_with_invalid_transaction_id(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
                 transaction_id = "invalid"
                 amount = 10.0
                 currency = "JPY"
                 result = api.capture(transaction_id, amount, currency)
+            post.assert_not_called()
 
     def test_capture_with_invalid_amount(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
                 transaction_id = 1234567890
                 amount = 99
                 currency = "JPY"
                 result = api.capture(transaction_id, amount, currency)
+            post.assert_not_called()
 
     def test_capture_with_none_currency(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
                 transaction_id = 1234567890
                 amount = 1.0
                 currency = None
                 result = api.capture(transaction_id, amount, currency)
+            post.assert_not_called()
 
     def test_capture_with_not_supported_currency(self):
         with patch('linepay.api.requests.post') as post:
@@ -358,6 +401,7 @@ class TestLinePayApi(unittest.TestCase):
                 amount = 1.0
                 currency = "GBP"
                 result = api.capture(transaction_id, amount, currency)
+            post.assert_not_called()
 
     def test_void(self):
         with patch('linepay.api.requests.post') as post:
