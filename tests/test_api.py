@@ -611,20 +611,25 @@ class TestLinePayApi(unittest.TestCase):
 
     def test_pay_preapproved(self):
         with patch('linepay.api.requests.post') as post:
+            # setup mocks
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            signed_header = deepcopy(api.headers)
+            signed_header["X-LINE-Authorization"] = "dummy"
+            mock_sign = MagicMock(return_value=signed_header)
+            api.sign = mock_sign
             mock_api_result = MagicMock(return_value={"returnCode": "0000"})
             post.return_value.json = mock_api_result
-            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
-            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
-            api.sign = mock_sign
             reg_key = "regkey-1234567890"
             product_name = "product-1234567890"
             amount = 10.0
             currency = "JPY"
             order_id = "order-1234567890"
-            result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
-            self.assertEqual(result, mock_api_result.return_value)
-            path = "/v3/payments/preapprovedPay/{}/payment".format(
+            expected_path = "/v3/payments/preapprovedPay/{}/payment".format(
                 reg_key
+            )
+            expected_url = "{api_endpoint}{path}".format(
+                api_endpoint=api.SANDBOX_API_ENDPOINT,
+                path=expected_path
             )
             request_options = {
                 "productName": product_name,
@@ -633,24 +638,40 @@ class TestLinePayApi(unittest.TestCase):
                 "orderId": order_id,
                 "capture": True
             }
-            mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
+            # execute
+            result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+            # assert
+            self.assertEqual(result, mock_api_result.return_value)
+            mock_sign.assert_called_once_with(
+                api.headers, expected_path, json.dumps(request_options)
+            )
+            post.assert_called_once_with(
+                expected_url, 
+                json.dumps(request_options), 
+                headers=signed_header
+            )
 
     def test_pay_preapproved_with_authorization(self):
         with patch('linepay.api.requests.post') as post:
+            # setup mocks
+            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            signed_header = deepcopy(api.headers)
+            signed_header["X-LINE-Authorization"] = "dummy"
+            mock_sign = MagicMock(return_value=signed_header)
+            api.sign = mock_sign
             mock_api_result = MagicMock(return_value={"returnCode": "0000"})
             post.return_value.json = mock_api_result
-            mock_sign = MagicMock(return_value={"X-LINE-Authorization": "dummy"})
-            api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
-            api.sign = mock_sign
             reg_key = "regkey-1234567890"
             product_name = "product-1234567890"
             amount = 10.0
             currency = "JPY"
             order_id = "order-1234567890"
-            result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id, capture=False)
-            self.assertEqual(result, mock_api_result.return_value)
-            path = "/v3/payments/preapprovedPay/{}/payment".format(
+            expected_path = "/v3/payments/preapprovedPay/{}/payment".format(
                 reg_key
+            )
+            expected_url = "{api_endpoint}{path}".format(
+                api_endpoint=api.SANDBOX_API_ENDPOINT,
+                path=expected_path
             )
             request_options = {
                 "productName": product_name,
@@ -659,23 +680,63 @@ class TestLinePayApi(unittest.TestCase):
                 "orderId": order_id,
                 "capture": False
             }
-            mock_sign.assert_called_once_with(api.headers, path, json.dumps(request_options))
+            # execute
+            result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id, capture=False)
+            # assert
+            self.assertEqual(result, mock_api_result.return_value)
+            mock_sign.assert_called_once_with(
+                api.headers, expected_path, json.dumps(request_options)
+            )
+            post.assert_called_once_with(
+                expected_url, 
+                json.dumps(request_options), 
+                headers=signed_header
+            )
 
     def test_pay_preapproved_with_failed_return_code(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1104"})
+            # setup mocks
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
+            signed_header = deepcopy(api.headers)
+            signed_header["X-LINE-Authorization"] = "dummy"
+            mock_sign = MagicMock(return_value=signed_header)
+            api.sign = mock_sign
+            mock_api_result = MagicMock(return_value={"returnCode": "1101"})
+            post.return_value.json = mock_api_result
+            reg_key = "regkey-1234567890"
+            product_name = "product-1234567890"
+            amount = 10.0
+            currency = "JPY"
+            order_id = "order-1234567890"
+            expected_path = "/v3/payments/preapprovedPay/{}/payment".format(
+                reg_key
+            )
+            expected_url = "{api_endpoint}{path}".format(
+                api_endpoint=api.SANDBOX_API_ENDPOINT,
+                path=expected_path
+            )
+            request_options = {
+                "productName": product_name,
+                "amount": int(amount),
+                "currency": currency,
+                "orderId": order_id,
+                "capture": True
+            }
+            # execute
             with self.assertRaises(LinePayApiError):
-                reg_key = "regkey-1234567890"
-                product_name = "product-1234567890"
-                amount = 10.0
-                currency = "JPY"
-                order_id = "order-1234567890"
                 result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+            # assert
+            mock_sign.assert_called_once_with(
+                api.headers, expected_path, json.dumps(request_options)
+            )
+            post.assert_called_once_with(
+                expected_url, 
+                json.dumps(request_options), 
+                headers=signed_header
+            )
 
     def test_pay_preapproved_with_none_reg_key(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
                 reg_key = None
@@ -684,10 +745,10 @@ class TestLinePayApi(unittest.TestCase):
                 currency = "JPY"
                 order_id = "order-1234567890"
                 result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+            post.assert_not_called()
 
     def test_pay_preapproved_with_invalid_reg_key(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
                 reg_key = 9999
@@ -696,10 +757,10 @@ class TestLinePayApi(unittest.TestCase):
                 currency = "JPY"
                 order_id = "order-1234567890"
                 result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+            post.assert_not_called()
 
     def test_pay_preapproved_with_none_product_name(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
                 reg_key = "regkey-1234567890"
@@ -708,10 +769,10 @@ class TestLinePayApi(unittest.TestCase):
                 currency = "JPY"
                 order_id = "order-1234567890"
                 result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+            post.assert_not_called()
 
     def test_pay_preapproved_with_invalid_product_name(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
                 reg_key = "regkey-1234567890"
@@ -720,10 +781,10 @@ class TestLinePayApi(unittest.TestCase):
                 currency = "JPY"
                 order_id = "order-1234567890"
                 result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+            post.assert_not_called()
 
     def test_pay_preapproved_with_invalid_amount(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
                 reg_key = "regkey-1234567890"
@@ -732,10 +793,10 @@ class TestLinePayApi(unittest.TestCase):
                 currency = "JPY"
                 order_id = "order-1234567890"
                 result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+            post.assert_not_called()
 
     def test_pay_preapproved_with_none_currency(self):
         with patch('linepay.api.requests.post') as post:
-            post.return_value.json = MagicMock(return_value={"returnCode": "1101"})
             api = linepay.LinePayApi("channel_id", "channel_secret", is_sandbox=True)
             with self.assertRaises(ValueError):
                 reg_key = "regkey-1234567890"
@@ -744,6 +805,7 @@ class TestLinePayApi(unittest.TestCase):
                 currency = None
                 order_id = "order-1234567890"
                 result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+            post.assert_not_called()
 
     def test_pay_preapproved_with_not_supported_currency(self):
         with patch('linepay.api.requests.post') as post:
@@ -755,6 +817,7 @@ class TestLinePayApi(unittest.TestCase):
                 currency = "GBP"
                 order_id = "order-1234567890"
                 result = api.pay_preapproved(reg_key, product_name, amount, currency, order_id)
+            post.assert_not_called()
 
     def test_check_reg_key(self):
         with patch('linepay.api.requests.get') as get:
