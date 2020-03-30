@@ -35,6 +35,7 @@ Requirements
 ------------
 
 -  Python >= 3.6
+-  requests >= 2.22.0
 
 Installation
 ------------
