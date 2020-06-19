@@ -20,7 +20,8 @@ class LinePayApi(object):
     DEFAULT_API_ENDPOINT = "https://api-pay.line.me"
     SANDBOX_API_ENDPOINT = "https://sandbox-api-pay.line.me"
     CHECK_REGKEY_SAFE_RETURN_CODE_LIST = ["0000", "1190", "1193"]
-    CHECK_PAYMENT_STATUS_SAFE_RETURN_CODE_LIST = ["0000", "0110", "0121", "0122", "0123"]
+    CHECK_PAYMENT_STATUS_SAFE_RETURN_CODE_LIST = [
+        "0000", "0110", "0121", "0122", "0123"]
 
     @classmethod
     @validate_function_args_return_value
@@ -34,7 +35,7 @@ class LinePayApi(object):
         if obj is not None:
             result = True
         return result
-    
+
     @classmethod
     @validate_function_args_return_value
     def round_amount_by_currency(cls, currency: str, amount: float):
@@ -80,7 +81,8 @@ class LinePayApi(object):
         """generate signature method
         :param dict headers: Request HTTP Headers
         :param str path: API request path
-        :param str body: API request body for POST Request or Query String (Without "?") for GET Request
+        :param str body: API request body for POST Request or Query String
+            (Without "?") for GET Request
         :rtpye dict: signed headers
         """
         LOGGER.debug("path: %s", path)
@@ -95,10 +97,11 @@ class LinePayApi(object):
         hmac_text_bytes: bytes = hmac_text_str.encode()
         sign = hmac.new(
             hmac_key, hmac_text_bytes, hashlib.sha256)
-        signed_headers["X-LINE-Authorization"] = base64.b64encode(sign.digest()).decode()
+        signed_headers["X-LINE-Authorization"] = base64.b64encode(
+            sign.digest()).decode()
         LOGGER.debug(signed_headers)
         return signed_headers
-    
+
     @validate_function_args_return_value
     def _create_nonce(self) -> str:
         """generate nonce for HMAC Authorization
@@ -109,7 +112,8 @@ class LinePayApi(object):
     @validate_function_args_return_value
     def request(self, options: dict) -> dict:
         """Method to Request Payment
-        :param dict options: LINE Pay Request API Options see https://pay.line.me/jp/developers/apis/onlineApis?locale=ja_JP
+        :param dict options: LINE Pay Request API Options
+            see https://pay.line.me/jp/developers/apis/onlineApis?locale=ja_JP
         :rtpye dict: Request API response
         """
         path = "/{api_version}/payments/request".format(
@@ -140,15 +144,18 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def confirm(self, transaction_id: int, amount: float, currency: str) -> dict:
+    def confirm(self, transaction_id: int, amount: float, currency: str) \
+            -> dict:
         """Method to Confirm Payment
         :param int transaction_id: Transaction id returned from Request API
         :param float amount: Payment amount
-        :param str currency: Payment currency (ISO 4217) Supported currencies are USD, JPY, TWD and THB
+        :param str currency: Payment currency (ISO 4217) Supported currencies
+            are USD, JPY, TWD and THB
         :rtpye dict: Confirm API response
         """
         if (self.__class__.is_supported_currency(currency) is False):
-            raise ValueError("Currency:[{}] is not supported by LINE Pay".format(currency))
+            raise ValueError(
+                "Currency:[{}] is not supported by LINE Pay".format(currency))
         path = "/{api_version}/payments/{transaction_id}/confirm".format(
             api_version=self.LINE_PAY_API_VERSION,
             transaction_id=str(transaction_id)
@@ -183,19 +190,23 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def capture(self, transaction_id: int, amount: float, currency: str) -> dict:
+    def capture(self, transaction_id: int, amount: float, currency: str) \
+            -> dict:
         """Method to Capture Payment
         :param int transaction_id: Transaction id returned from Request API
         :param float amount: Payment amount
-        :param str currency: Payment currency (ISO 4217) Supported currencies are USD, JPY, TWD and THB
+        :param str currency: Payment currency (ISO 4217) Supported currencies
+            are USD, JPY, TWD and THB
         :rtpye dict: Capture API response
         """
         if (self.__class__.is_supported_currency(currency) is False):
-            raise ValueError("Currency:[{}] is not supported by LINE Pay".format(currency))
-        path = "/{api_version}/payments/authorizations/{transaction_id}/capture".format(
-            api_version=self.LINE_PAY_API_VERSION,
-            transaction_id=str(transaction_id)
-        )
+            raise ValueError(
+                "Currency:[{}] is not supported by LINE Pay".format(currency))
+        path = "/{api_version}/payments/authorizations/" \
+            "{transaction_id}/capture".format(
+                api_version=self.LINE_PAY_API_VERSION,
+                transaction_id=str(transaction_id)
+            )
         url = "{api_endpoint}{path}".format(
             api_endpoint=self.api_endpoint,
             path=path
@@ -231,10 +242,11 @@ class LinePayApi(object):
         :param int transaction_id: Transaction id returned from Request API
         :rtpye dict: Void API response
         """
-        path = "/{api_version}/payments/authorizations/{transaction_id}/void".format(
-            api_version=self.LINE_PAY_API_VERSION,
-            transaction_id=str(transaction_id)
-        )
+        path = "/{api_version}/payments/authorizations/" \
+            "{transaction_id}/void".format(
+                api_version=self.LINE_PAY_API_VERSION,
+                transaction_id=str(transaction_id)
+            )
         url = "{api_endpoint}{path}".format(
             api_endpoint=self.api_endpoint,
             path=path
@@ -303,28 +315,31 @@ class LinePayApi(object):
 
     @validate_function_args_return_value
     def pay_preapproved(
-        self, 
-        reg_key: str, 
-        product_name: str, 
-        amount: float, 
-        currency: str, 
-        order_id: str,
-        capture: bool = True) -> dict:
+            self,
+            reg_key: str,
+            product_name: str,
+            amount: float,
+            currency: str,
+            order_id: str,
+            capture: bool = True) -> dict:
         """Method to Pay Preapproved
         :param str reg_key: RegKey returned from Confirm API
         :param str product_name: Product name
         :param float amount: Payment amount
-        :param str currency: Payment currency (ISO 4217) Supported currencies are USD, JPY, TWD and THB
+        :param str currency: Payment currency (ISO 4217) Supported currencies
+            are USD, JPY, TWD and THB
         :param str order_id: Order id
         :param bool capture: Capture payment nor not
         :rtpye dict: Pay Preapproved API response
         """
         if (self.__class__.is_supported_currency(currency) is False):
-            raise ValueError("Currency:[{}] is not supported by LINE Pay".format(currency))
-        path = "/{api_version}/payments/preapprovedPay/{reg_key}/payment".format(
-            api_version=self.LINE_PAY_API_VERSION,
-            reg_key=reg_key
-        )
+            raise ValueError(
+                "Currency:[{}] is not supported by LINE Pay".format(currency))
+        path = "/{api_version}/payments/preapprovedPay/" \
+            "{reg_key}/payment".format(
+                api_version=self.LINE_PAY_API_VERSION,
+                reg_key=reg_key
+            )
         url = "{api_endpoint}{path}".format(
             api_endpoint=self.api_endpoint,
             path=path
@@ -358,10 +373,12 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def check_regkey(self, reg_key: str, credit_card_auth: bool = False) -> dict:
+    def check_regkey(self, reg_key: str, credit_card_auth: bool = False) \
+            -> dict:
         """Method to Check RegKey
         :param str reg_key: Reg Key returned from Confirm API
-        :param bool credit_card_auth: Whether credit cards issued with RegKey have authorized minimum amount
+        :param bool credit_card_auth: Whether credit cards issued with RegKey
+            have authorized minimum amount
         :rtpye dict: Check RegKey API response
         """
         path = "/{api_version}/payments/preapprovedPay/{reg_key}/check".format(
@@ -408,10 +425,11 @@ class LinePayApi(object):
         :param str reg_key: Reg Key returned from Confirm API
         :rtpye dict: Expire RegKey API response
         """
-        path = "/{api_version}/payments/preapprovedPay/{reg_key}/expire".format(
-            api_version=self.LINE_PAY_API_VERSION,
-            reg_key=reg_key
-        )
+        path = "/{api_version}/payments/preapprovedPay/" \
+            "{reg_key}/expire".format(
+                api_version=self.LINE_PAY_API_VERSION,
+                reg_key=reg_key
+            )
         url = "{api_endpoint}{path}".format(
             api_endpoint=self.api_endpoint,
             path=path
@@ -443,17 +461,19 @@ class LinePayApi(object):
         :param int transaction_id: TransactionId returned from Request API
         :rtpye dict: Check Payment Status API response
         """
-        path = "/{api_version}/payments/requests/{transaction_id}/check".format(
-            api_version=self.LINE_PAY_API_VERSION,
-            transaction_id=str(transaction_id)
-        )
+        path = "/{api_version}/payments/requests/" \
+            "{transaction_id}/check".format(
+                api_version=self.LINE_PAY_API_VERSION,
+                transaction_id=str(transaction_id)
+            )
         url = "{api_endpoint}{path}".format(
             api_endpoint=self.api_endpoint,
             path=path
         )
         headers = self.sign(self.headers, path, "")
 
-        LOGGER.debug("Going to execute Check Payment Status API [URL: %s]", url)
+        LOGGER.debug(
+            "Going to execute Check Payment Status API [URL: %s]", url)
         response = requests.get(url, headers=headers)
         result = response.json()
         LOGGER.debug(result)
@@ -471,9 +491,12 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def payment_details(self, transaction_id: int = None, order_id: str = None) -> dict:
+    def payment_details(
+        self, transaction_id: int = None,
+            order_id: str = None) -> dict:
         """Method to Payment Details
-        :param int transaction_id: Payment or refund transaction ID generated by LINE Pay
+        :param int transaction_id: Payment or refund transaction ID generated
+            by LINE Pay
         :param str order_id: Order ID of the merchant
         :rtpye dict: Payment Details API response
         """

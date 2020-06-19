@@ -7,7 +7,7 @@ LOGGER = logging.getLogger('linepay')
 
 
 def validate_function_args_return_value(func):
-    """decorator for function arguments and retun value
+    """decorator for function arguments and return value
     :param func:
     :return:
     """

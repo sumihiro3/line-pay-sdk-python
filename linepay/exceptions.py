@@ -47,7 +47,8 @@ class LinePayApiError(BaseError):
         :type headers: dict[str, str]
         :param dict api_response: API response json
         """
-        super(LinePayApiError, self).__init__(api_response.get("returnMessage"))
+        super(LinePayApiError, self).__init__(
+            api_response.get("returnMessage"))
 
         self.return_code = return_code
         self.status_code = status_code
