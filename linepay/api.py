@@ -273,7 +273,7 @@ class LinePayApi(object):
             )
 
     @validate_function_args_return_value
-    def refund(self, transaction_id: int, refund_amount: float = 0.0) -> dict:
+    def refund(self, transaction_id: int, refund_amount: int = 0) -> dict:
         """Method to Refund Payment
         :param int transaction_id: Transaction id returned from Request API
         :param float refund_amount: Refund amount. Full refund if not returned
