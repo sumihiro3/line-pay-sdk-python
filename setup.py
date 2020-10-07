@@ -11,7 +11,7 @@ with open("README.rst", "r") as fd:
 
 setup(
     name="line-pay",
-    version="0.1.0",
+    version="0.2.0",
     description="LINE Pay API SDK for Python",
     long_description=long_description,
     long_description_content_type="text/x-rst",
