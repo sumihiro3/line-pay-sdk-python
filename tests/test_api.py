@@ -5,6 +5,7 @@ import linepay
 from linepay.exceptions import LinePayApiError
 from copy import deepcopy
 
+
 class TestLinePayApi(unittest.TestCase):
 
     def test_is_supported_currency(self):
@@ -58,7 +59,7 @@ class TestLinePayApi(unittest.TestCase):
         self.assertEqual(api.channel_id, channel_id)
         self.assertEqual(api.channel_secret, channel_secret)
         self.assertEqual(api.api_endpoint, linepay.LinePayApi.DEFAULT_API_ENDPOINT)
-    
+
     def test_constructor_with_default_endpoint(self):
         print("testing constructor with production.")
         channel_id = "hoge"
@@ -107,13 +108,13 @@ class TestLinePayApi(unittest.TestCase):
             # assert
             self.assertEqual(result, mock_api_result.return_value)
             mock_sign.assert_called_once_with(
-                api.headers, 
-                expected_path, 
+                api.headers,
+                expected_path,
                 json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -145,13 +146,13 @@ class TestLinePayApi(unittest.TestCase):
                 result = api.request(request_options)
             # assert
             mock_sign.assert_called_once_with(
-                api.headers, 
-                expected_path, 
+                api.headers,
+                expected_path,
                 json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -187,8 +188,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -224,8 +225,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -311,8 +312,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -348,8 +349,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -430,8 +431,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -464,8 +465,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -496,7 +497,7 @@ class TestLinePayApi(unittest.TestCase):
             mock_api_result = MagicMock(return_value={"returnCode": "0000"})
             post.return_value.json = mock_api_result
             transaction_id = 1234567890
-            amount = 10.0
+            amount = 10
             expected_path = "/v3/payments/{}/refund".format(
                 transaction_id
             )
@@ -515,8 +516,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -547,8 +548,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -579,8 +580,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -646,8 +647,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -688,8 +689,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
@@ -730,8 +731,8 @@ class TestLinePayApi(unittest.TestCase):
                 api.headers, expected_path, json.dumps(request_options)
             )
             post.assert_called_once_with(
-                expected_url, 
-                json.dumps(request_options), 
+                expected_url,
+                json.dumps(request_options),
                 headers=signed_header
             )
 
